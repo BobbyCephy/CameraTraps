@@ -502,7 +502,7 @@ def main():
     parser.add_argument(
         '--lossless',
         type=int,
-        default=False,
+        default=True,
         help='Crop jpeg lossless (boxes are expanded by 15 pixels at most)')
 
     parser.add_argument(
