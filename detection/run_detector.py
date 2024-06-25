@@ -375,7 +375,6 @@ def load_and_run_detector(model_file, image_file_names, output_dir,
     # ...def input_file_to_detection_file()
     
     for im_file in tqdm(image_file_names):
-
         try:
             start_time = time.time()
 
@@ -409,49 +408,67 @@ def load_and_run_detector(model_file, image_file_names, output_dir,
             continue
 
         exif = image.getexif()
+        
+        import exiftool
 
-        try:
-            if crop_images:
-                try:
-                    images_cropped = viz_utils.crop_image(result['detections'], image,
-                                       confidence_threshold=render_confidence_threshold,
-                                       expansion=box_expansion,
-                                       expansion_relative=box_expansion_relative, lossless=lossless)
+        with exiftool.ExifToolAlpha() as et:
+            def copy_tags(source, target):
+                et.copy_tags(source, target)
+                save_date(target)
+    
+            def save_date(file):
+                et.execute(
+                    "-DateTimeOriginal>FileCreateDate",
+                    "-DateTimeOriginal>FileModifyDate",
+                    file,
+                )
 
-                    for i_crop, cropped_image in enumerate(images_cropped):
-                        output_full_path = input_file_to_detection_file(im_file, i_crop)
+            try:
+                if crop_images:
+                    try:
+                        images_cropped = viz_utils.crop_image(result['detections'], image,
+                                           confidence_threshold=render_confidence_threshold,
+                                           expansion=box_expansion,
+                                           expansion_relative=box_expansion_relative, lossless=lossless)
+    
+                        for i_crop, cropped_image in enumerate(images_cropped):
+                            output_full_path = input_file_to_detection_file(im_file, i_crop)
+                            
+                            try:
+                                cropped_image.save(output_full_path, exif=exif)
+                                
+                            except:
+                                cropped_image.save(output_full_path)
+                                
+                            copy_tags(im_file, output_full_path)
+                                
+                    except Exception as e:
+                        print('Cropping image {} failed. Exception: {}'.format(im_file, e))
+    
+                if add_boxes:
+                    try:
+                        # Image is modified in place
+                        viz_utils.render_detection_bounding_boxes(result['detections'], image,
+                                    label_map=DEFAULT_DETECTOR_LABEL_MAP,
+                                    confidence_threshold=render_confidence_threshold,
+                                    thickness=box_thickness, expansion=box_expansion,
+                                    expansion_relative=box_expansion_relative)
+                        output_full_path = input_file_to_detection_file(im_file)
                         
                         try:
-                            cropped_image.save(output_full_path, exif=exif)
+                            image.save(output_full_path, exif=exif)
                             
                         except:
-                            cropped_image.save(output_full_path)
+                            image.save(output_full_path)
                             
-                except Exception as e:
-                    print('Cropping image {} failed. Exception: {}'.format(im_file, e))
-
-            if add_boxes:
-                try:
-                    # Image is modified in place
-                    viz_utils.render_detection_bounding_boxes(result['detections'], image,
-                                label_map=DEFAULT_DETECTOR_LABEL_MAP,
-                                confidence_threshold=render_confidence_threshold,
-                                thickness=box_thickness, expansion=box_expansion,
-                                expansion_relative=box_expansion_relative)
-                    output_full_path = input_file_to_detection_file(im_file)
-                    
-                    try:
-                        image.save(output_full_path, exif=exif)
+                        copy_tags(im_file, output_full_path)
                         
-                    except:
-                        image.save(output_full_path)
-                    
-                except Exception as e:
-                    print('Adding boxe to image {} failed. Exception: {}'.format(im_file, e))
-
-        except Exception as e:
-            print('Visualizing results on the image {} failed. Exception: {}'.format(im_file, e))
-            continue
+                    except Exception as e:
+                        print('Adding boxe to image {} failed. Exception: {}'.format(im_file, e))
+    
+            except Exception as e:
+                print('Visualizing results on the image {} failed. Exception: {}'.format(im_file, e))
+                continue
 
     # ...for each image
 
