@@ -359,6 +359,9 @@ def load_and_run_detector(model_file, image_file_names, output_dir,
             name += '_crop{:0>2d}'.format(crop_index)
         if image_format:
             ext = '.{}'.format(image_format)
+        elif lossless and not 'jp' in os.path.splitext(fn)[1]:
+            ext = '.png'
+            
         fn = '{}{}{}'.format(name, ImagePathUtils.DETECTION_FILENAME_INSERT, ext)
         if fn in output_filename_collision_counts:
             n_collisions = output_filename_collision_counts[fn]
