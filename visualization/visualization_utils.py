@@ -228,6 +228,8 @@ def crop_image(detections, image, confidence_threshold=0.15, expansion=0, expans
             except:
                 print("")
 
+    expansion_ratio = expansion_relative / (1 - 2*expansion_relative)
+
     ret_images = []
 
     for detection in detections:
