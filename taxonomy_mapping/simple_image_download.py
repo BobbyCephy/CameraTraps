@@ -6,6 +6,7 @@ import progressbar
 from urllib.parse import quote
 import random
 from requests.exceptions import ReadTimeout,ConnectTimeout
+from PIL.Image import registered_extensions
 
 
 ################
@@ -72,10 +73,7 @@ class Downloader:
         ::param extension:iterable of Files extensions
     """
     def __init__(self, extensions=None):
-        if extensions:
-            self._extensions = set(*[extensions])
-        else:
-            self._extensions = {'.jpg', '.png', '.ico', '.gif', '.jpeg'}
+        self._extensions = set(extensions) if extensions else set(registered_extensions())
         self._directory = "simple_images/"
         self.get_dirs = set()
         self._cached_urls = {}

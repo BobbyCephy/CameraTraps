@@ -6,6 +6,7 @@ A module to hold the configurations specific to an instance of the API.
 """
 
 import os
+from PIL.Image import registered_extensions
 
 
 #%% instance-specific API settings
@@ -29,8 +30,7 @@ MONITOR_PERIOD_MINUTES = 10
 # if this number of times the thread wakes up to check is exceeded, stop the monitoring thread
 MAX_MONITOR_CYCLES = 4 * 7 * int((60 * 24) / MONITOR_PERIOD_MINUTES)  # 4 weeks
 
-IMAGE_SUFFIXES_ACCEPTED = ('.jpg', '.jpeg', '.png')  # case-insensitive
-assert isinstance(IMAGE_SUFFIXES_ACCEPTED, tuple)
+IMAGE_SUFFIXES_ACCEPTED = set(registered_extensions())  # case-insensitive
 
 OUTPUT_FORMAT_VERSION = '1.1'
 

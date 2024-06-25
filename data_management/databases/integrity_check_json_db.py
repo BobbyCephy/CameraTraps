@@ -31,6 +31,7 @@ from PIL import Image
 from tqdm import tqdm
 
 import ct_utils
+from PIL.Image import registered_extensions
 
 
 #%% Functions
@@ -226,7 +227,7 @@ def integrity_check_json_db(jsonFile, options=None):
         imagePaths = []
         for root, dirs, files in os.walk(baseDir):
             for file in files:
-                if file.lower().endswith(('.jpeg', '.jpg', '.png')):
+                if file.lower().endswith(set(registered_extensions())):
                     relDir = os.path.relpath(root, baseDir)
                     relFile = os.path.join(relDir,file)
                     relFile = os.path.normpath(relFile)

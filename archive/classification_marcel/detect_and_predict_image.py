@@ -488,8 +488,7 @@ if False:
 
 #%% File helper functions
 
-imageExtensions = ['.jpg','.jpeg','.gif','.png']
-imageExtensions = imageExtensions + [ext.upper() for ext in imageExtensions]
+imageExtensions = set(registered_extensions())
 
 def isImageFile(s):
     '''

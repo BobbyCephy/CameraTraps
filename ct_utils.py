@@ -14,6 +14,7 @@ import os
 
 import jsonpickle
 import numpy as np
+from PIL.Image import registered_extensions
 
 def truncate_float_array(xs, precision=3):
     """
@@ -97,7 +98,7 @@ def write_json(path, content, indent=1):
         json.dump(content, f, indent=indent)
 
 
-image_extensions = ['.jpg', '.jpeg', '.gif', '.png']
+image_extensions = set(registered_extensions())
 
 
 def is_image_file(s):

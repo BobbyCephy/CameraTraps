@@ -51,6 +51,7 @@ import humanfriendly
 from tqdm import tqdm
 
 import visualization.visualization_utils as viz_utils
+from PIL.Image import registered_extensions
 
 # ignoring all "PIL cannot read EXIF metainfo for the images" warnings
 warnings.filterwarnings('ignore', '(Possibly )?corrupt EXIF data', UserWarning)
@@ -125,7 +126,7 @@ class ImagePathUtils:
     # Stick this into filenames before the extension for the rendered result
     DETECTION_FILENAME_INSERT = '_detections'
 
-    image_extensions = ['.jpg', '.jpeg', '.gif', '.png']
+    image_extensions = ['.bmp', '.gif', '.jpg', '.jpeg', '.png', '.tif', '.heic']
 
     @staticmethod
     def is_image_file(s):

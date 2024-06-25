@@ -21,6 +21,7 @@ import shutil
 
 from collections import defaultdict
 from tqdm import tqdm
+from PIL.Image import registered_extensions
 
 
 #%% Support functions
@@ -93,7 +94,7 @@ def coco_to_yolo(input_image_folder,output_folder,input_file,
     
     image_names = set()
     
-    typical_image_extensions = set(['.jpg','.jpeg','.png','.gif','.tif','.bmp'])
+    typical_image_extensions = set(registered_extensions())
     
     printing_empty_annotation_warning = False
     
