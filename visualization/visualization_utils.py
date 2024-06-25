@@ -233,62 +233,65 @@ def crop_image(detections, image, confidence_threshold=0.15, expansion=0, expans
     ret_images = []
 
     for detection in detections:
+        try:
+            score = float(detection['conf'])
 
-        score = float(detection['conf'])
+            if score >= confidence_threshold:
 
-        if score >= confidence_threshold:
+                x1, y1, w_box, h_box = detection['bbox']
+                ymin,xmin,ymax,xmax = y1, x1, y1 + h_box, x1 + w_box
 
-            x1, y1, w_box, h_box = detection['bbox']
-            ymin,xmin,ymax,xmax = y1, x1, y1 + h_box, x1 + w_box
+                # Convert to pixels so we can use the PIL crop() function
+                im_width, im_height = image.size
+                (left, right, top, bottom) = (xmin * im_width, xmax * im_width,
+                                              ymin * im_height, ymax * im_height)
 
-            # Convert to pixels so we can use the PIL crop() function
-            im_width, im_height = image.size
-            (left, right, top, bottom) = (xmin * im_width, xmax * im_width,
-                                          ymin * im_height, ymax * im_height)
+                longer_side = max(right - left, bottom - top)
+                expansion_total = expansion + expansion_ratio * longer_side
 
-            longer_side = max(right - left, bottom - top)
-            expansion_total = expansion + expansion_relative * longer_side
+                if expansion_total > 0:
+                    left -= expansion_total
+                    right += expansion_total
+                    top -= expansion_total
+                    bottom += expansion_total
 
-            if expansion_total > 0:
-                left -= expansion_total
-                right += expansion_total
-                top -= expansion_total
-                bottom += expansion_total
+                if jpegimage:
+                    # Round towards the larger box
+                    left = int(np.floor(left))
+                    right = int(np.ceil(right))
+                    top = int(np.floor(top))
+                    bottom = int(np.ceil(bottom))
 
-            if jpegimage:
-                # Round towards the larger box
-                left = int(np.floor(left))
-                right = int(np.ceil(right))
-                top = int(np.floor(top))
-                bottom = int(np.ceil(bottom))
+                    # Left top corner has to be a multiple of 16
+                    mod_left = left % 16
+                    mod_top = top % 16
 
-                # Left top corner has to be a multiple of 16
-                mod_left = left % 16
-                mod_top = top % 16
+                    # Add modulo to all sides for uniform expansion
+                    left -= mod_left
+                    right += mod_left
+                    top -= mod_top
+                    bottom += mod_top
 
-                # Add modulo to all sides for uniform expansion
-                left -= mod_left
-                right += mod_left
-                top -= mod_top
-                bottom += mod_top
+                # PIL's crop() does surprising things if you provide values outside of
+                # the image, clip inputs
+                left = max(left,0); right = max(right,0)
+                top = max(top,0); bottom = max(bottom,0)
 
-            # PIL's crop() does surprising things if you provide values outside of
-            # the image, clip inputs
-            left = max(left,0); right = max(right,0)
-            top = max(top,0); bottom = max(bottom,0)
+                left = min(left,im_width-1); right = min(right,im_width-1)
+                top = min(top,im_height-1); bottom = min(bottom,im_height-1)
 
-            left = min(left,im_width-1); right = min(right,im_width-1)
-            top = min(top,im_height-1); bottom = min(bottom,im_height-1)
+                if jpegimage:
+                    width = right - left
+                    height = bottom - top
+                    ret_images.append(jpegimage.crop(left, top, width, height))
 
-            if jpegimage:
-                width = right - left
-                height = bottom - top
-                ret_images.append(jpegimage.crop(left, top, width, height))
+                else:
+                    ret_images.append(image.crop((left, top, right, bottom)))
 
-            else:
-                ret_images.append(image.crop((left, top, right, bottom)))
-
-        # ...if this detection is above threshold
+            # ...if this detection is above threshold
+            
+        except:
+            print(image)
 
     # ...for each detection
 
