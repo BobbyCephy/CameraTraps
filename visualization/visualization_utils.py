@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import requests
 from PIL import Image, ImageFile, ImageFont, ImageDraw, ImageOps
+from pillow_heif import register_heif_opener
+register_heif_opener()
 from jpegtran import JPEGImage
 
 from data_management.annotations import annotation_constants
